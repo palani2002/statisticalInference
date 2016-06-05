@@ -1,0 +1,170 @@
+---
+title: "Statistical Inference Course Project"
+author: "Palani"
+date: "Sunday, June 05, 2016"
+output: word_document
+---
+##### Overview 
+In this project ,investigating the `exponential distribution` in `R` and compare it with the `Central Limit Theorem`. The exponential distribution simulated in R with rexp(n, lambda) where lambda is the rate parameter. The `mean` of exponential distribution is `1/lambda` and the `standard deviation` is also `1/lambda`. Setting lambda = 0.2 for all of the simulations.And investigate the distribution of averages of 40 exponentials over thousand simulations.
+
+
+#### Goal  
+Using simulation ,when the number of samples increases simulated exponential distribution approximates `Norma Distribution`. 
+
+##### Task1
+**Show the sample mean and compare it to the theoretical mean of the distribution.**
+
+*Theoretical Mean Distribution*
+
+Theoretical mean of the exponential distribution is `r paste(1/.2)`,where `lambda` is 0.4.
+
+Visual Represtation of `Theoretical exponential distribution`.
+
+```{r eval=TRUE,echo=FALSE,warning=FALSE,message=FALSE}
+library(ggplot2)
+n<-40
+lambda<-0.2
+l1<-rexp(n, lambda)
+l1<-as.data.frame(l1)
+names(l1)<-c('Exp')
+
+g <- ggplot(l1, aes(x = Exp)) + geom_histogram(fill = "salmon", colour = "black", binwidth=1)
+g <- g + geom_vline(xintercept = mean(l1$Exp), size = 3)
+g+ggtitle("Theoretical Mean")+theme(axis.text = element_text(colour = "blue"))+
+  theme(axis.text=element_text(size=12),axis.title=element_text(size=20,face="bold"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+```
+
+**Distributions of averages of 40 exponentials over 1000 Simulations**
+
+```{r eval=TRUE,echo=TRUE}
+lambda<-0.2
+n<-40
+nosim <- 1000 #1000 simulations
+
+meanExp<-c() # creating null vector
+
+for (i in 1:nosim){
+  lhats <- rexp(n, lambda) #generating exponential distribution
+  meanExp[i]<-mean(lhats)  # averaging each simulation
+}
+
+#overall mean for the 1000 simulations.
+simMean<-mean(meanExp)
+simMean
+
+```
+
+**Visualising simulated exponential Distribution**
+
+```{r eval=TRUE,echo=FALSE,message=FALSE,warning=FALSE}
+meanExp<-as.data.frame(meanExp)
+names(meanExp)<-c('simExp')
+library(ggplot2)
+g <- ggplot(meanExp, aes(x = simExp)) + geom_histogram(fill = "salmon", colour = "black", binwidth=1)
+g <- g + geom_vline(xintercept = mean(meanExp$simExp), size = 3)
+g+ggtitle("Comparing Sample Mean with\n Theoretical Mean")+theme(axis.text = element_text(colour ="blue"))+theme(axis.text=element_text(size=12),axis.title=element_text(size=20,face="bold"))+
+theme(plot.title = element_text(lineheight=.8, face="bold"))
+```
+
+**Inference**
+`The Law of Large Number` says that sample mean of simulated iid sample is consistent for the `Theoretical Mean`.
+
+##### Task2  
+**Show how variable the sample is (via variance) and compare it to the theoretical variance of the distribution.**  
+
+The simulated variance of exponential is 
+```{r echo=TRUE,eval=TRUE}
+simVar<-var(meanExp)
+simVar
+```
+
+And the theoretical variance is
+
+```{r echo=TRUE,eval=TRUE}
+theryVar<-1/(lambda)^2/n
+theryVar
+```
+
+**Inference**  
+The result shows that the variance of `Simulated exponential Distribution` approximates the variance of `Theoretical Distribution`.
+
+##### Task3
+**Show that the distribution is approximately normal.**
+
+The `density` plot of normal curve shows that the disribution is approximately `Normal`. 
+
+```{r eval=TRUE,echo=FALSE,message=FALSE,warning=FALSE}
+library(ggplot2)
+ggplot(meanExp, aes(x=simExp)) + 
+  geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                 binwidth=.5,
+                 colour="black", fill="white") +
+  geom_density(alpha=.2, fill="#FF6666")  # Overlay with transparent density plot
+
+```
+
+*Normal Probablity Plot*
+
+The plot shows that the distributions are close to diagonal ,again this plot confirma the simulated 
+distribution approximates `Normal`. 
+
+```{r,echo=TRUE,eval=TRUE}
+qqnorm(meanExp$simExp)
+qqline(meanExp$simExp)
+
+```
+
+**Inference**
+The above two plots confirms normality.
+
+
+###### Appendix- Rcode
+
+```{r eval=FALSE,echo=TRUE,warning=FALSE,message=FALSE}
+library(ggplot2)
+n<-40
+lambda<-0.2
+l1<-rexp(n, lambda)
+l1<-as.data.frame(l1)
+names(l1)<-c('Exp')
+
+g <- ggplot(l1, aes(x = Exp)) + geom_histogram(fill = "salmon", colour = "black", binwidth=1)
+g <- g + geom_vline(xintercept = mean(l1$Exp), size = 3)
+g+ggtitle("Theoretical Mean")+theme(axis.text = element_text(colour = "blue"))+
+  theme(axis.text=element_text(size=12),axis.title=element_text(size=20,face="bold"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+```
+
+```{r eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+meanExp<-as.data.frame(meanExp)
+names(meanExp)<-c('simExp')
+library(ggplot2)
+g <- ggplot(meanExp, aes(x = simExp)) + geom_histogram(fill = "salmon", colour = "black", binwidth=1)
+g <- g + geom_vline(xintercept = mean(meanExp$simExp), size = 3)
+g+ggtitle("Comparing Sample Mean with\n Theoretical Mean")+theme(axis.text = element_text(colour ="blue"))+theme(axis.text=element_text(size=12),axis.title=element_text(size=20,face="bold"))+
+theme(plot.title = element_text(lineheight=.8, face="bold"))
+```
+
+
+```{r eval=FALSE,echo=TRUE,message=FALSE,warning=FALSE}
+library(ggplot2)
+ggplot(meanExp, aes(x=simExp)) + 
+  geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                 binwidth=.5,
+                 colour="black", fill="white") +
+  geom_density(alpha=.2, fill="#FF6666")  # Overlay with transparent density plot
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
